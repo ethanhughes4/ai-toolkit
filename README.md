@@ -9,7 +9,11 @@ spec-driven development.
 agent-toolkit/
 ├── install.ps1                 copies skills/agents into ~/.claude
 ├── skills/
-│   └── spec-writer/            interviews you, writes specs/NNN-slug/spec.md
+│   └── spec-writer/            interviews you, 
+│   └── app-ui/                 designs/builds app UI, keeps design/SYSTEM.md, screenshots + fixes
+│       ├── SKILL.md
+│       ├── templates/SYSTEM.md
+│       └── scripts/screenshot.mjswrites specs/NNN-slug/spec.md
 │       ├── SKILL.md
 │       └── templates/
 │           ├── spec-template.md
@@ -22,11 +26,12 @@ agent-toolkit/
 
 ## Build order
 
-1. **spec-writer skill** ← current
-2. Build with plain Claude Code (baseline, no custom builder)
-3. **reviewer agent** (scores a build against the spec's acceptance criteria)
-4. **builder agent** (compare against the step 2 baseline using the reviewer)
-5. planner agent, UI skill, hooks — one at a time, when a real problem calls for them
+1. **spec-writer skill** ✅ v0.4
+2. Build with plain Claude Code ✅ (baseline)
+3. **app-ui skill** ← current
+4. **reviewer agent**
+5. **builder agent** (only if the reviewer shows plain Claude Code falling short)
+6. planner agent, hooks (e.g. a slop-detector hook) — when a real problem calls for them
 
 Rule: add **one** new piece at a time. Everything else stays a known quantity.
 
