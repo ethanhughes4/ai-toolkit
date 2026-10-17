@@ -121,7 +121,8 @@ Some decisions depend on others. Ask them in that order.
 - **Errors:** which situations count as errors and what the user is told
 - **State:** time and date changes, things that were saved before
 - **Data edges:** what happens when saving fails, when saved data cannot be
-  read, and when nothing has been saved yet
+  read, when nothing has been saved yet, and when saved dates are in the
+  future (e.g. the device clock was changed)
 - **Existing behaviour:** what must keep working unchanged
 - **Out of scope:** always ask "What would a user assume is included, but is not?"
 
@@ -169,7 +170,7 @@ Each criterion describes one behaviour with a clear pass or fail. "Fast",
 
 | Impact | Means | Examples | What you do |
 |---|---|---|---|
-| HIGH | Changes what the user can do, what data is kept or lost, or the rules of the feature | Saving fails; saved data is unreadable; what gets deleted; which day an action counts for; whether something can be undone | Ask the user. A HIGH guess may never stay an assumption. |
+| HIGH | Changes what the user can do, what data is kept or lost, or the rules of the feature | Saving fails; saved data is unreadable; what gets deleted; which day an action counts for; whether something can be undone; whether a number the user relies on can go down. If you can name a reasonable alternative behaviour that changes data or a number the user relies on, it is HIGH.| Ask the user. A HIGH guess may never stay an assumption. |
 | MEDIUM | Changes what the user sees or the order of things, but not the rules | List order; what a count includes | Ask if you can; otherwise decide and tag it. |
 | LOW | Exact wording, small display details | Message text; date label format | Decide and tag it. |
 
