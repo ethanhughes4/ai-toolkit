@@ -109,6 +109,7 @@ If there are no discovery notes, ask for them once. If the user has none, carry 
 - Never put secret values in the file.
 - Keep it to about one page.
 - When a decision changes later, update its row and add a Changes line. Don't delete history.
+- Don't hand-build security mechanisms (logins, lockouts, rate limits, sessions) when something simpler fits: restrict by network (for example, admin only reachable from the machine itself), a well-known library, or a managed login provider. Hand-built ones go in Risks as high risk.
 
 ## Red flags
 - Choosing tech the user didn't approve

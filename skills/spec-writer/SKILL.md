@@ -127,7 +127,7 @@ Some decisions depend on others. Ask them in that order.
   or payments): who can see, change or delete each thing; what a signed-out
   user can do; what a user might try that they shouldn't (e.g. open someone
   else's item by changing an id). Write each as an IF … THEN THE SYSTEM SHALL
-  criterion. Treat these as HIGH impact — always ask.
+  criterion. Treat these as HIGH impact — always ask.  Write abuse limits as outcomes, not methods. For example: "guessing the admin password must be too slow to be practical, and nobody else can lock the admin out", not "5 tries per device".
 - **Existing behaviour:** what must keep working unchanged
 - **Out of scope:** always ask "What would a user assume is included, but is not?"
 

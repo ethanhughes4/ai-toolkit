@@ -32,6 +32,9 @@ or delete this section if every case is already in the acceptance criteria.]
 ## Existing behaviour that must not change
 - [Something that already works and must keep working.]
 
+## Known limits
+- <a limit the owner has accepted, why, and when to revisit it>
+
 ## Out of scope
 - [Something the user explicitly does NOT want in this feature.]
 - Future spec: [extra the user chose to add later]
