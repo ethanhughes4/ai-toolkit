@@ -1,95 +1,87 @@
-# agent-toolkit
+# ai-toolkit
 
-Standalone Claude Code skills and agents, each built and tested on its own using
-spec-driven development.
+Standalone Claude Code skills and agents for spec-driven development. Each
+piece works on its own and was added because a real run showed it was needed.
 
 ## What's in here
 
 ```
-agent-toolkit/
+ai-toolkit/
 ├── install.ps1 / install.cmd   copy skills + agents into ~/.claude (run "install")
 ├── skills/
 │   ├── spec-writer/            interviews you, writes specs/NNN-slug/spec.md
-│   │   ├── SKILL.md
-│   │   └── templates/ (spec-template.md, bugfix-template.md)
+│   │   └── templates/          spec-template.md, bugfix-template.md
 │   ├── app-ui/                 designs structure + look, keeps design/SYSTEM.md,
-│   │   ├── SKILL.md            screenshots and fixes
-│   │   ├── templates/SYSTEM.md
+│   │   ├── templates/SYSTEM.md screenshots and fixes
 │   │   └── scripts/screenshot.mjs
-│   └── review/                 verifies a build against spec + SYSTEM.md
-│       └── SKILL.md
+│   ├── secure-build/           security rules the builder follows on every build
+│   └── review/                 the review rules: code, ui and security lanes
+│       └── scripts/check-rules.mjs   mechanical checks (no AI)
 ├── agents/
-│   └── reviewer.md             fresh-context agent that runs the review skill
-└── templates/                  starter files to copy into new projects
+│   ├── builder.md              builds an approved spec: build → check → review → fix
+│   └── reviewer.md             runs the code, ui and security lanes in parallel
+└── templates/                  starter files for a new project
     ├── CLAUDE.md
     └── runs.md
 ```
 
-## Build order
+## Use
 
-1. **spec-writer skill** ✅ v0.4
-2. Build with plain Claude Code ✅ (baseline)
-3. **app-ui skill** ✅ v0.3
-4. **review skill + reviewer agent** ← current
-5. **builder agent** (fresh context, follows spec, uses app-ui)
-6. **/ship orchestrator** (main session: spec → structure → builder → reviewer → fix loop)
-7. Hooks (e.g. a slop-detector hook) — when a real problem calls for them
+Everything installs to your personal Claude folder, so it works in any project.
 
-Rule: add **one** new piece at a time. Everything else stays a known quantity.
+| You want to… | Type in Claude Code |
+|---|---|
+| Plan a feature | `/spec-writer <idea>` |
+| Build an approved spec | `Commit everything, then use the builder agent to build specs/NNN-slug/spec.md` |
+| Only design or fix the UI | `/app-ui redesign …` |
+| Only review | `Use the reviewer agent: Review specs/NNN-slug/spec.md. Base commit: <sha>. Round: 1.` |
 
-## Versions
+If the builder returns **NEEDS DECISION**, ask Claude to show you the options
+from `builds/NNN-slug-structure.md`, pick one, then run the builder again.
 
-Bump the version comment at the top of a SKILL.md when you change it, and
-mention it in the commit message (e.g. `app-ui v0.3: accent belongs to the
-frequent task`). Note versions in `runs.md` so you know which version caused
-which result.
+After a build: look at the app, read `builds/NNN-slug-build.md`, then commit.
 
-## Workflow per feature (until /ship exists)
+## New project
 
-1. `/spec-writer <one-liner>` → answer → approve the spec
-2. `/clear`, then build:
+1. `npm create vite@latest my-app -- --template react-ts` then `npm install`
+2. Copy `templates/CLAUDE.md` in and fill in the stack and commands
+3. `/spec-writer <your idea>`
+
+app-ui sets up Playwright and its screenshot script the first time it runs.
+The builder and reviewer run check-rules from the review skill folder, so
+nothing else needs copying.
+
+## How the pieces fit
+
 ```
-   Implement @specs/NNN-slug/spec.md. Use the app-ui skill for all UI.
-   Do not guess at any behaviour the spec does not cover. When you finish,
-   list every assumption you had to make in two groups: "Behaviour
-   assumptions" (anything a user could see or do differently) and
-   "Technical assumptions" (files, data format, libraries, naming).
-   If a group is empty, write "none".
+main session:  /spec-writer → you approve          (needs your answers)
+               app-ui layout options → you pick    (only for new screens)
+builder agent: PREPARE → BUILD (app-ui + secure-build) → CHECK → REVIEW → FIX → REPORT
+reviewer agent:          ├─ code lane  (always)
+                         ├─ ui lane    (if UI changed)
+                         └─ security lane (always)
 ```
-3. Review: `Use the reviewer agent to review specs/NNN-slug/spec.md`
-4. Accept or change the behaviour assumptions, then ask Claude to add the
-   accepted ones to the spec as numbered EARS criteria (no code changes).
-   The spec must always match what was built.
-5. Log the run in `notes/runs.md`.
 
-## Scoring
+Subagents cannot ask you questions, so specs and layout choices stay in the
+main session.
 
-- **Spec-writer:** number of *behaviour* assumptions the builder lists. Target 0.
-- **Conventions:** interaction assumptions (Enter, messages, confirmations) are
-  gaps in SYSTEM.md / app-ui, not the spec.
-- **app-ui:** tell count 0–1, and the five checks (task-first, signature,
-  grey-box, swap, token) pass.
-- **Reviewer:** planted-bugs eval (below) — bugs caught, false alarms.
+## Status
 
-## Test cases for spec-writer
-
-| # | Type into Claude Code | Expected |
+| Piece | Version | Tested |
 |---|---|---|
-| T1 | `/spec-writer a habit tracker where I can add habits and tick them off each day` | Feature. Capability split if needed. No tech-stack words. |
-| T2 | `/spec-writer change the app title to "Daily Habits"` | Tiny. Says no spec needed. Writes nothing. |
-| T3 | `/spec-writer show how many habits I've done today, like 3/5` | Small. ≤ 4 questions. Short spec. Lists existing behaviour that must not change. |
-| T4 | `/spec-writer show a streak for each habit — days in a row — and my best streak` | Feature on top of existing code. Fills "must not change" from earlier specs. |
-| T5 | Describe a real bug you find | Bug. Bugfix template with "must not change" section. |
+| spec-writer | v0.5 | ✅ Runs 001–003, 009 |
+| app-ui | v0.3 | ✅ Runs 004–006, 009 |
+| check-rules | — | ✅ planted-bug cases |
+| review + reviewer | v0.4 / v0.2 | ⚠️ 3 lanes not run yet |
+| secure-build | v0.1 | ⚠️ no project with a server yet |
+| builder | v0.2 | ✅ v0.1 Run 009 (spec 003) |
 
-## Eval for the reviewer: planted bugs
+Not covered yet (add when a real project needs it): backends and databases in
+practice, React Native, fully hands-off runs.
 
-1. `git checkout -b review-test`
-2. New session — plant 4 bugs (a criterion-breaking logic bug, a raw hex colour,
-   a weakened test, a removed focus ring) and record them in
-   `.review-test/answers.md` (gitignored). Commit as "wip".
-3. New session — `Use the reviewer agent to review specs/NNN-slug/spec.md`
-4. Compare the review with `answers.md`: caught / false alarms / real extras.
-   Target: 4/4, no false alarms.
-5. `git checkout main` then `git branch -D review-test`
+## Rules for changing the toolkit
 
-Rerun this every time the review skill changes.
+- Add a piece only when a real run shows the need. One new piece at a time.
+- Bump the version comment at the top of a file when you change it, and put
+  the version in the commit message.
+- Log every run in the project's `notes/runs.md`.

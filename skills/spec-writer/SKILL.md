@@ -5,7 +5,7 @@ argument-hint: [one-line description of the feature or bug]
 allowed-tools: AskUserQuestion, Read, Glob, Grep, Write, Edit
 ---
 
-<!-- spec-writer v0.4 -->
+<!-- spec-writer v0.5 -->
 
 # Spec Writer
 
