@@ -1,6 +1,6 @@
 # Design system
 
-Mode: Operate (app UI) · Written by: app-ui v0.1 · Approved: [YYYY-MM-DD]
+Mode: Operate (app UI) · Written by: app-ui v0.3 · Approved: [YYYY-MM-DD]
 
 ## Intent
 - **Who:** [the specific person and the moment they open the app]
@@ -10,7 +10,7 @@ Mode: Operate (app UI) · Written by: app-ui v0.1 · Approved: [YYYY-MM-DD]
 ## Direction
 - **Domain:** [5+ concepts from the product's world]
 - **Colour world:** [5+ colours that exist in that world]
-- **Signature:** [one element only this product has]
+- **Signature:** [one element only this product has — able to shape structure]
 - **Rejected defaults:**
   - [default] → [instead]
   - [default] → [instead]
@@ -27,7 +27,7 @@ Rename tokens to fit the product's world; keep the roles.
 | `--ink-soft` | | | Secondary text |
 | `--ink-faint` | | | Metadata, placeholders, disabled |
 | `--line` | | | Quiet borders and dividers |
-| `--accent` | | | Primary action, selection |
+| `--accent` | | | The most frequent task and its result, selection |
 | `--accent-ink` | | | Text on accent |
 | `--success` | | | Status only |
 | `--danger` | | | Errors and destructive actions only |
@@ -59,10 +59,22 @@ Rename tokens to fit the product's world; keep the roles.
 Uses the app-ui defaults, except:
 - [any project-specific change, or "none"]
 
+## Screen structures
+One entry per screen. Future builds follow these instead of re-deciding.
+
+### [Screen name]
+- **Tasks by frequency:** every visit: [ ] · sometimes: [ ] · rarely: [ ]
+- **Default rejected:** [the AI-default layout] — because [ ]
+- **Structure:**
+```
+  [text wireframe at phone width]
+```
+- **Why:** [two sentences — task frequency + signature]
+
 ## Component patterns
 Add a pattern once it is used twice. Record real values.
-- [e.g. Button primary — 40px high · 8px 16px padding · 6px radius · 15px/600]
+- [e.g. Button quiet — 44px high · 8px 12px padding · 6px radius · 15px/500]
 
 ## Allowed exceptions
-Banned patterns this project uses on purpose, and why.
+Banned patterns or rule breaks this project uses on purpose, and why.
 - [none]

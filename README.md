@@ -7,66 +7,89 @@ spec-driven development.
 
 ```
 agent-toolkit/
-├── install.ps1                 copies skills/agents into ~/.claude
+├── install.ps1 / install.cmd   copy skills + agents into ~/.claude (run "install")
 ├── skills/
-│   └── spec-writer/            interviews you, 
-│   └── app-ui/                 designs/builds app UI, keeps design/SYSTEM.md, screenshots + fixes
-│       ├── SKILL.md
-│       ├── templates/SYSTEM.md
-│       └── scripts/screenshot.mjswrites specs/NNN-slug/spec.md
-│       ├── SKILL.md
-│       └── templates/
-│           ├── spec-template.md
-│           └── bugfix-template.md
-├── agents/                     (empty for now — reviewer, then builder)
-└── templates/
-    ├── CLAUDE.md               starter project rules for a test project
-    └── runs.md                 run log: what went wrong after each build
+│   ├── spec-writer/            interviews you, writes specs/NNN-slug/spec.md
+│   │   ├── SKILL.md
+│   │   └── templates/ (spec-template.md, bugfix-template.md)
+│   ├── app-ui/                 designs structure + look, keeps design/SYSTEM.md,
+│   │   ├── SKILL.md            screenshots and fixes
+│   │   ├── templates/SYSTEM.md
+│   │   └── scripts/screenshot.mjs
+│   └── review/                 verifies a build against spec + SYSTEM.md
+│       └── SKILL.md
+├── agents/
+│   └── reviewer.md             fresh-context agent that runs the review skill
+└── templates/                  starter files to copy into new projects
+    ├── CLAUDE.md
+    └── runs.md
 ```
 
 ## Build order
 
 1. **spec-writer skill** ✅ v0.4
 2. Build with plain Claude Code ✅ (baseline)
-3. **app-ui skill** ← current
-4. **reviewer agent**
-5. **builder agent** (only if the reviewer shows plain Claude Code falling short)
-6. planner agent, hooks (e.g. a slop-detector hook) — when a real problem calls for them
+3. **app-ui skill** ✅ v0.3
+4. **review skill + reviewer agent** ← current
+5. **builder agent** (fresh context, follows spec, uses app-ui)
+6. **/ship orchestrator** (main session: spec → structure → builder → reviewer → fix loop)
+7. Hooks (e.g. a slop-detector hook) — when a real problem calls for them
 
 Rule: add **one** new piece at a time. Everything else stays a known quantity.
 
 ## Versions
 
-Bump the version in the commit message when you change a skill, e.g.
-`spec-writer v0.2: stop asking about tech stack`. Note the version in `runs.md`
-so you can tell which version caused which result.
+Bump the version comment at the top of a SKILL.md when you change it, and
+mention it in the commit message (e.g. `app-ui v0.3: accent belongs to the
+frequent task`). Note versions in `runs.md` so you know which version caused
+which result.
+
+## Workflow per feature (until /ship exists)
+
+1. `/spec-writer <one-liner>` → answer → approve the spec
+2. `/clear`, then build:
+```
+   Implement @specs/NNN-slug/spec.md. Use the app-ui skill for all UI.
+   Do not guess at any behaviour the spec does not cover. When you finish,
+   list every assumption you had to make in two groups: "Behaviour
+   assumptions" (anything a user could see or do differently) and
+   "Technical assumptions" (files, data format, libraries, naming).
+   If a group is empty, write "none".
+```
+3. Review: `Use the reviewer agent to review specs/NNN-slug/spec.md`
+4. Accept or change the behaviour assumptions, then ask Claude to add the
+   accepted ones to the spec as numbered EARS criteria (no code changes).
+   The spec must always match what was built.
+5. Log the run in `notes/runs.md`.
+
+## Scoring
+
+- **Spec-writer:** number of *behaviour* assumptions the builder lists. Target 0.
+- **Conventions:** interaction assumptions (Enter, messages, confirmations) are
+  gaps in SYSTEM.md / app-ui, not the spec.
+- **app-ui:** tell count 0–1, and the five checks (task-first, signature,
+  grey-box, swap, token) pass.
+- **Reviewer:** planted-bugs eval (below) — bugs caught, false alarms.
 
 ## Test cases for spec-writer
 
-Run these in the test project, in order. Each one checks a different part of the
-skill. Expected behaviour is what "working" looks like.
-
 | # | Type into Claude Code | Expected |
 |---|---|---|
-| T1 | `/spec-writer a habit tracker where I can add habits and tick them off each day` | Size = Feature. Full interview. Creates `specs/001-...`. No tech-stack words. |
-| T2 | `/spec-writer change the app title to "Daily Habits"` | Size = Tiny. Says no spec needed. Writes nothing. |
-| T3 | `/spec-writer let me delete a habit` | Size = Small. ≤ 4 questions. Short spec. Asks about confirm-before-delete and what happens to past ticks. |
-| T4 | `/spec-writer show a streak for each habit — days in a row — and my best streak` | Size = Feature. Asks about missed days / today not yet ticked. Lists existing behaviour that must not change. |
-| T5 | Describe a real bug you find while building T1–T4 | Size = Bug. Uses bugfix template with "must not change" section. |
+| T1 | `/spec-writer a habit tracker where I can add habits and tick them off each day` | Feature. Capability split if needed. No tech-stack words. |
+| T2 | `/spec-writer change the app title to "Daily Habits"` | Tiny. Says no spec needed. Writes nothing. |
+| T3 | `/spec-writer show how many habits I've done today, like 3/5` | Small. ≤ 4 questions. Short spec. Lists existing behaviour that must not change. |
+| T4 | `/spec-writer show a streak for each habit — days in a row — and my best streak` | Feature on top of existing code. Fills "must not change" from earlier specs. |
+| T5 | Describe a real bug you find | Bug. Bugfix template with "must not change" section. |
 
-Build each spec (fresh session) before writing the next, so later specs have
-real code to look at. Use this build prompt every time:
+## Eval for the reviewer: planted bugs
 
-```
-Implement @specs/NNN-slug/spec.md. Do not guess at any behaviour the spec
-does not cover. When you finish, list every assumption you had to make under
-the heading "Assumptions". If you made none, write "Assumptions: none".
-```
+1. `git checkout -b review-test`
+2. New session — plant 4 bugs (a criterion-breaking logic bug, a raw hex colour,
+   a weakened test, a removed focus ring) and record them in
+   `.review-test/answers.md` (gitignored). Commit as "wip".
+3. New session — `Use the reviewer agent to review specs/NNN-slug/spec.md`
+4. Compare the review with `answers.md`: caught / false alarms / real extras.
+   Target: 4/4, no false alarms.
+5. `git checkout main` then `git branch -D review-test`
 
-**Main measure of the spec-writer:** the number of behaviour assumptions the
-builder lists. Each one is a gap the spec-writer should have asked about. The
-target is zero. Technical assumptions (file names, libraries) don't count —
-those belong to the plan, not the spec.
-
-When a test case fails, fix `SKILL.md`, re-run `install.ps1`, and run the same
-test case again. These test cases become the first evals later.
+Rerun this every time the review skill changes.
