@@ -1,5 +1,6 @@
 #!/usr/bin/env node
 // check-rules.mjs — mechanical project checks. No AI, no judgement: patterns only.
+// v0.3: skips files ignored by git (build output, tool caches, .env).
 //
 // Usage:
 //   node scripts/check-rules.mjs                 check the whole project (tests vs HEAD)
@@ -264,11 +265,24 @@ export function checkFile(root, rel, out) {
   else if (DATA_EXT.has(ext) || base.startsWith('.env')) checkSecrets(rel, text.split(/\r?\n/), out);
 }
 
+// In a git repo, check tracked files plus new files that aren't ignored, so
+// anything in .gitignore (build output, tool caches, .env) is skipped.
+// Outside git, walk the folders instead.
+function projectFiles(root) {
+  try {
+    const out = git(['ls-files', '--cached', '--others', '--exclude-standard'], root);
+    return out.split('\n').filter(Boolean)
+      .filter((rel) => !rel.split('/').some((part) => IGNORE_DIRS.has(part)));
+  } catch {
+    return walk(root, root);
+  }
+}
+
 export function runChecks({ root = process.cwd(), base = 'HEAD', files = null } = {}) {
   const out = [];
   const list = files
     ? files.map((f) => (isAbsolute(f) ? relative(root, f) : f).replace(/\\/g, '/'))
-    : walk(root, root);
+    : projectFiles(root);
   for (const rel of list) checkFile(root, rel, out);
   checkTestChanges(root, base, files ? new Set(list) : null, out);
   return out;
