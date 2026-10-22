@@ -1,0 +1,34 @@
+{
+  "name": "spec-writer-scope",
+  "about": "Run 001 — no scope creep, no tech words",
+  "fixture": "minimal",
+  "prompt": "/spec-writer a habit tracker where I can add habits and tick them off each day\n\nI can't answer questions right now, so don't ask any. Choose the smallest version that does what I asked, tag every decision you make yourself as an assumption, and write the spec.",
+  "maxTurns": 40,
+  "budgetUsd": 2,
+  "graders": [
+    { "label": "spec written", "type": "file_exists", "path": "specs/**/spec.md" },
+    {
+      "label": "≤ 15 acceptance criteria",
+      "type": "count",
+      "target": "file:specs/**/spec.md",
+      "pattern": "^\\s*-\\s*\\*\\*\\d+\\.\\d+\\*\\*",
+      "flags": "gm",
+      "min": 3,
+      "max": 15
+    },
+    {
+      "label": "no tech-stack words",
+      "type": "regex",
+      "target": "file:specs/**/spec.md",
+      "pattern": "\\b(React|localStorage|TypeScript|Vite|Vitest|component|database)\\b",
+      "flags": "i",
+      "absent": true
+    },
+    {
+      "label": "only what was asked",
+      "type": "judge",
+      "target": "file:specs/**/spec.md",
+      "rubric": "Look only at the acceptance criteria. PASS if they only cover adding habits and ticking them off per day, plus errors and edge cases of those two things. FAIL if any criterion adds a feature the user did not ask for, such as streaks, reminders, statistics, categories, renaming or deleting habits, or history. Features listed only under 'Out of scope' do not count."
+    }
+  ]
+}

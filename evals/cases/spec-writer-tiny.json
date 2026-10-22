@@ -1,0 +1,17 @@
+{
+  "name": "spec-writer-tiny",
+  "about": "T2 — a tiny change must not get a spec",
+  "fixture": "minimal",
+  "prompt": "/spec-writer change the app title to \"Daily Habits\"",
+  "maxTurns": 20,
+  "budgetUsd": 1,
+  "graders": [
+    { "label": "no spec written", "type": "file_absent", "path": "specs/**/spec.md" },
+    {
+      "label": "says no spec is needed",
+      "type": "judge",
+      "target": "reply",
+      "rubric": "PASS if the reply says this change is too small to need a spec (or that no spec is needed). FAIL if it wrote a spec, started an interview, or offered to write a spec anyway."
+    }
+  ]
+}

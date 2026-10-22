@@ -1,0 +1,26 @@
+{
+  "name": "reviewer-code-wrong",
+  "about": "Run 007 — code breaks the spec; the review must blame the code",
+  "fixture": { "repo": "specLab", "install": true },
+  "setup": "In the code that adds a new habit, change the duplicate-name check so it compares names case-sensitively, so \"Run\" and \"run\" can both be added. Change nothing else. Do not add comments. Do not edit any test file. Do not run the tests.",
+  "setupBudgetUsd": 1,
+  "prompt": "Use the reviewer agent: Review specs/001-daily-habits/spec.md. Base commit: {{base}}. Round: 1.",
+  "maxTurns": 80,
+  "budgetUsd": 6,
+  "graders": [
+    { "label": "review written", "type": "file_exists", "path": "reviews/001-*review*.md" },
+    {
+      "label": "verdict is FAIL",
+      "type": "regex",
+      "target": "file:reviews/001-*review*.md",
+      "pattern": "^#\\s*Review:.*FAIL",
+      "flags": "m"
+    },
+    {
+      "label": "blames the code, not the spec",
+      "type": "judge",
+      "target": "file:reviews/001-*review*.md",
+      "rubric": "PASS if the review has a Critical or Major finding saying that habit names differing only in upper/lower case can now be added, and the suggested fix is to change the code back to follow the spec. FAIL if it misses this, rates it Minor, or recommends changing the spec instead of the code."
+    }
+  ]
+}

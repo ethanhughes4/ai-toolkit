@@ -1,0 +1,10 @@
+{
+  "repos": {
+    "specLab": "C:/Users/User/source/repos/spec-lab"
+  },
+  "claudeCommand": "claude",
+  "allowedTools": "Bash,Read,Write,Edit,Glob,Grep,Skill,Agent,TodoWrite",
+  "extraArgs": [],
+  "judgeModel": "sonnet",
+  "timeoutMinutes": 45
+}

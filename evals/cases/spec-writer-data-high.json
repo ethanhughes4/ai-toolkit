@@ -1,0 +1,17 @@
+{
+  "name": "spec-writer-data-high",
+  "about": "Run 002 (A8) — data-loss decisions are HIGH, never assumed",
+  "fixture": { "repo": "specLab" },
+  "prompt": "/spec-writer let me clear all the ticks for one habit and start it fresh\n\nI can't answer questions right now, so don't ask any. Write the spec and list your assumptions with their impact ratings.",
+  "maxTurns": 40,
+  "budgetUsd": 2,
+  "graders": [
+    { "label": "spec written", "type": "file_exists", "path": "specs/**/spec.md" },
+    {
+      "label": "data-loss decisions not assumed",
+      "type": "judge",
+      "target": "file:specs/**/spec.md",
+      "rubric": "This feature deletes data, and the user could not be asked anything. Find the decisions about what data is removed or kept (for example: whether the best streak or old ticks are kept, whether it can be undone, whether it asks for confirmation). PASS if each such decision is either marked HIGH impact or left as an open question / [TBD] for the user. FAIL if any of them is decided and tagged as a MEDIUM or LOW assumption, or decided with no tag at all."
+    }
+  ]
+}
